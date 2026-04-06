@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="&THEN Wine List">
+<title>&THEN — Wine List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;--surface:#111;--card:#161616;
+  --white:#fafaf7;--gold:#b8972a;--gold-light:#d4b04a;
+  --muted:#666;--border:rgba(255,255,255,0.07);
+  --low-bg:rgba(180,130,0,0.15);--low-color:#d4a017;
+  --oos-bg:rgba(160,40,40,0.15);--oos-color:#e57373;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+
+header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0.85rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;letter-spacing:0.06em}
+.header-tag{font-size:0.58rem;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted)}
+
+.filter-wrap{position:sticky;top:53px;z-index:40;background:var(--black);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-wrap::-webkit-scrollbar{display:none}
+.filter-bar{display:flex;gap:0.4rem;padding:0.7rem 1rem;width:max-content;min-width:100%}
+.filter-btn{background:none;border:1px solid rgba(255,255,255,0.13);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.67rem;font-weight:400;letter-spacing:0.08em;padding:0.4rem 0.85rem;border-radius:100px;cursor:pointer;white-space:nowrap;transition:all 0.18s;-webkit-tap-highlight-color:transparent}
+.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:500}
+
+.sort-bar{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;scrollbar-width:none}
+.sort-bar::-webkit-scrollbar{display:none}
+.sort-label{font-size:0.58rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.sort-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.62rem;padding:0.3rem 0.65rem;border-radius:5px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all 0.15s;flex-shrink:0}
+.sort-btn.active{border-color:rgba(184,151,42,0.4);color:var(--gold-light);background:rgba(184,151,42,0.08)}
+
+.content{padding:1.25rem 1rem 6rem}
+
+.cat-section{margin-bottom:2.5rem;animation:fadeUp 0.3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;padding-bottom:0.65rem;border-bottom:1px solid rgba(184,151,42,0.2)}
+.cat-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:300;letter-spacing:0.06em}
+.cat-count{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+
+.wine-card{padding:1rem 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s}
+.wine-card:last-child{border-bottom:none}
+.wine-card.out-of-stock{opacity:0.5}
+.wine-card:active{opacity:0.7}
+
+.wine-top{display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;margin-bottom:0.3rem}
+.wine-name{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;color:var(--white);line-height:1.3;flex:1;min-width:0}
+.wine-price{font-size:0.95rem;font-weight:500;color:var(--gold-light);white-space:nowrap;flex-shrink:0;padding-top:0.05rem}
+
+.wine-origin{font-size:0.72rem;color:var(--muted);margin-bottom:0.25rem;letter-spacing:0.02em}
+.wine-origin .sep{color:rgba(255,255,255,0.2);margin:0 0.3rem}
+.wine-grape{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-bottom:0.35rem;letter-spacing:0.02em}
+/* Wine photo */
+.wine-photo{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:0.65rem;border:1px solid var(--border)}
+
+.wine-notes{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:rgba(255,255,255,0.42);line-height:1.55;margin-bottom:0.45rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wine-notes.expanded{-webkit-line-clamp:unset;overflow:visible}
+
+.wine-footer{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;min-height:1.4rem}
+.wine-badge{display:inline-block;font-size:0.58rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:3px}
+.badge-low{background:var(--low-bg);color:var(--low-color)}
+.badge-oos{background:var(--oos-bg);color:var(--oos-color)}
+.read-more{font-size:0.65rem;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase;background:none;border:none;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:1rem}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+
+.empty{text-align:center;padding:4rem 1rem;color:var(--muted)}
+.empty-title{font-size:0.82rem;letter-spacing:0.12em;text-transform:uppercase}
+.empty-sub{font-size:0.72rem;margin-top:0.4rem;opacity:0.6}
+
+footer{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid var(--border);padding:0.65rem 1.25rem;text-align:center;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">&amp;THEN</div>
+  <div class="header-tag">Wine List</div>
+</header>
+
+<div class="filter-wrap">
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-cat="All">All</button>
+    <button class="filter-btn" data-cat="Red Wine">Red Wine</button>
+    <button class="filter-btn" data-cat="White Wine">White Wine</button>
+    <button class="filter-btn" data-cat="Natural Red">Natural Red</button>
+    <button class="filter-btn" data-cat="Natural White">Natural White</button>
+    <button class="filter-btn" data-cat="Orange Wine">Orange Wine</button>
+    <button class="filter-btn" data-cat="Pet Nat">Pet Nat</button>
+  </div>
+</div>
+
+<div class="sort-bar">
+  <span class="sort-label">Sort:</span>
+  <button class="sort-btn active" data-sort="default">Default</button>
+  <button class="sort-btn" data-sort="name-az">A–Z</button>
+  <button class="sort-btn" data-sort="name-za">Z–A</button>
+  <button class="sort-btn" data-sort="price-asc">Price ↑</button>
+  <button class="sort-btn" data-sort="price-desc">Price ↓</button>
+  <button class="sort-btn" data-sort="in-stock">In Stock First</button>
+</div>
+
+<main class="content" id="content">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading wines…</div>
+  </div>
+</main>
+
+<footer>&amp;THEN &nbsp;·&nbsp; Wine &amp; Bar</footer>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+// ── STEP 1: Paste your Supabase credentials here ─────────────────────────────
+const SUPABASE_URL  = 'https://frdzflolyoynybizibhw.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_VmESVnVYdyBRtpJdmHyyzA_0q85tFo3'
+// ─────────────────────────────────────────────────────────────────────────────
+
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+const CATS = ['Red Wine','White Wine','Natural Red','Natural White','Orange Wine','Pet Nat']
+let allWines = []
+let activeCat = 'All'
+let activeSort = 'default'
+
+// ── Fetch wines ───────────────────────────────────────────────────────────────
+async function fetchWines() {
+  const { data, error } = await db.from('wines').select('*').order('name')
+  if (error) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-title">Could not load wines</div>
+        <div class="empty-sub">Check your Supabase config in the HTML file</div>
+      </div>`
+    console.error(error)
+    return
+  }
+  allWines = data || []
+  render()
+}
+
+// ── Real-time subscription — updates list whenever any wine changes ────────────
+db.channel('wines-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'wines' }, fetchWines)
+  .subscribe()
+
+fetchWines()
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+function sortWines(list) {
+  const arr = [...list]
+  switch (activeSort) {
+    case 'name-az':    return arr.sort((a,b) => a.name.localeCompare(b.name))
+    case 'name-za':    return arr.sort((a,b) => b.name.localeCompare(a.name))
+    case 'price-asc':  return arr.sort((a,b) => Number(a.price) - Number(b.price))
+    case 'price-desc': return arr.sort((a,b) => Number(b.price) - Number(a.price))
+    case 'in-stock':   return arr.sort((a,b) => {
+      const qa = parseInt(a.quantity??0), qb = parseInt(b.quantity??0)
+      if (qa > 0 && qb === 0) return -1
+      if (qa === 0 && qb > 0) return 1
+      return 0
+    })
+    default: return arr
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const content = document.getElementById('content')
+  if (allWines.length === 0) {
+    content.innerHTML = `<div class="empty"><div class="empty-title">No wines available</div><div class="empty-sub">Check back soon</div></div>`
+    return
+  }
+  const cats = activeCat === 'All' ? CATS : [activeCat]
+  let html = ''
+  cats.forEach(cat => {
+    const items = sortWines(allWines.filter(w => w.category === cat))
+    if (!items.length) return
+    html += `<div class="cat-section">
+      <div class="cat-header">
+        <span class="cat-title">${cat}</span>
+        <span class="cat-count">${items.length} wine${items.length !== 1 ? 's' : ''}</span>
+      </div>
+      ${items.map(w => {
+        const qty = parseInt(w.quantity ?? 0)
+        const isOos = qty === 0, isLow = qty > 0 && qty <= 5
+        const badge = isOos
+          ? `<span class="wine-badge badge-oos">Out of stock</span>`
+          : isLow ? `<span class="wine-badge badge-low">Only ${qty} left</span>` : ''
+        const origin = [w.region, w.country].filter(Boolean)
+        const originHtml = origin.length
+          ? `<div class="wine-origin">${origin.map(s => esc(s)).join('<span class="sep">·</span>')}</div>` : ''
+        const hasNotes = w.notes && w.notes.trim()
+        const longNotes = hasNotes && w.notes.length > 80
+        return `<div class="wine-card${isOos ? ' out-of-stock' : ''}">
+          ${w.photo_url ? `<img class="wine-photo" src="${esc(w.photo_url)}" alt="${esc(w.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <div class="wine-top">
+            <div class="wine-name">${esc(w.name)}</div>
+            <div class="wine-price">฿${Number(w.price).toLocaleString()}</div>
+          </div>
+          ${originHtml}
+          ${w.grape ? `<div class="wine-grape">${esc(w.grape)}</div>` : ''}
+          ${hasNotes ? `<div class="wine-notes" id="notes-${w.id}">${esc(w.notes)}</div>` : ''}
+          <div class="wine-footer">
+            <div>${badge}</div>
+            ${longNotes ? `<button class="read-more" onclick="toggleNotes('${w.id}',this)">More</button>` : ''}
+          </div>
+        </div>`
+      }).join('')}
+    </div>`
+  })
+  content.innerHTML = html || `<div class="empty"><div class="empty-title">No wines in this category</div></div>`
+}
+
+window.toggleNotes = (id, btn) => {
+  const el = document.getElementById('notes-' + id)
+  if (!el) return
+  const expanded = el.classList.toggle('expanded')
+  btn.textContent = expanded ? 'Less' : 'More'
+}
+
+document.getElementById('filter-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn')
+  if (!btn) return
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  activeCat = btn.dataset.cat
+  render()
+})
+
+document.querySelector('.sort-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.sort-btn')
+  if (!btn) return
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  activeSort = btn.dataset.sort
+  render()
+})
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+</script>
+</body>
+</html>
