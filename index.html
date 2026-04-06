@@ -3,93 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#FAF8F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="&THEN Wine List">
 <title>&THEN — Wine List</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --black:#0a0a0a;--surface:#111;--card:#161616;
-  --white:#fafaf7;--gold:#b8972a;--gold-light:#d4b04a;
-  --muted:#666;--border:rgba(255,255,255,0.07);
-  --low-bg:rgba(180,130,0,0.15);--low-color:#d4a017;
-  --oos-bg:rgba(160,40,40,0.15);--oos-color:#e57373;
+  --cream:#FAF8F3;
+  --cream-dark:#F2EDE4;
+  --cream-mid:#EDE6DA;
+  --ink:#1C1209;
+  --ink-light:#4A3F32;
+  --muted:#8C7B6B;
+  --gold:#7A5C1E;
+  --gold-light:#9B7528;
+  --gold-accent:#C9A84C;
+  --border:rgba(100,80,50,0.12);
+  --border-gold:rgba(180,140,60,0.3);
+  --low-bg:#FFF8EC;--low-color:#8B6010;
+  --oos-bg:#FDF0EF;--oos-color:#9B3A35;
 }
 html{scroll-behavior:smooth}
-body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 
-header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0.85rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
-.brand{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;letter-spacing:0.06em}
-.header-tag{font-size:0.58rem;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted)}
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,248,243,0.97);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.7rem;font-weight:400;
+  letter-spacing:0.08em;color:var(--ink);
+  line-height:1;
+}
+.brand-sub{
+  font-size:0.55rem;font-weight:500;
+  letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--muted);margin-top:0.2rem;
+}
+.header-right{
+  font-size:0.6rem;font-weight:500;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);
+}
 
-.filter-wrap{position:sticky;top:53px;z-index:40;background:var(--black);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+/* ── Hero tagline ────────────────────────────────────────────────────────────── */
+.hero{
+  text-align:center;
+  padding:1.75rem 1.5rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  background:var(--cream-dark);
+}
+.hero-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.7rem;font-weight:400;
+  letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--muted);
+}
+.hero-rule{
+  display:flex;align-items:center;gap:0.75rem;
+  margin:0.6rem auto 0;max-width:200px;
+}
+.hero-rule::before,.hero-rule::after{
+  content:'';flex:1;height:1px;background:var(--border-gold);
+}
+.hero-rule-icon{color:var(--gold-accent);font-size:0.7rem}
+
+/* ── Filter tabs ─────────────────────────────────────────────────────────────── */
+.filter-wrap{
+  position:sticky;top:68px;z-index:40;
+  background:var(--cream);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
 .filter-wrap::-webkit-scrollbar{display:none}
-.filter-bar{display:flex;gap:0.4rem;padding:0.7rem 1rem;width:max-content;min-width:100%}
-.filter-btn{background:none;border:1px solid rgba(255,255,255,0.13);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.67rem;font-weight:400;letter-spacing:0.08em;padding:0.4rem 0.85rem;border-radius:100px;cursor:pointer;white-space:nowrap;transition:all 0.18s;-webkit-tap-highlight-color:transparent}
-.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:500}
+.filter-bar{
+  display:flex;gap:0.35rem;
+  padding:0.75rem 1.25rem;
+  width:max-content;min-width:100%;
+}
+.filter-btn{
+  background:none;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.68rem;font-weight:400;
+  letter-spacing:0.06em;
+  padding:0.45rem 1rem;
+  border-radius:100px;
+  cursor:pointer;white-space:nowrap;
+  transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.filter-btn.active{
+  background:var(--ink);
+  border-color:var(--ink);
+  color:var(--cream);
+  font-weight:500;
+}
 
-.sort-bar{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;scrollbar-width:none}
+/* ── Sort bar ────────────────────────────────────────────────────────────────── */
+.sort-bar{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.5rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  background:var(--cream-dark);
+  overflow-x:auto;scrollbar-width:none;
+}
 .sort-bar::-webkit-scrollbar{display:none}
-.sort-label{font-size:0.58rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
-.sort-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.62rem;padding:0.3rem 0.65rem;border-radius:5px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all 0.15s;flex-shrink:0}
-.sort-btn.active{border-color:rgba(184,151,42,0.4);color:var(--gold-light);background:rgba(184,151,42,0.08)}
+.sort-label{
+  font-size:0.58rem;font-weight:500;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap;flex-shrink:0;
+}
+.sort-btn{
+  background:none;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.62rem;
+  padding:0.28rem 0.7rem;
+  border-radius:4px;
+  cursor:pointer;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  transition:all 0.15s;flex-shrink:0;
+}
+.sort-btn.active{
+  border-color:var(--gold);
+  color:var(--gold);
+  background:rgba(122,92,30,0.06);
+  font-weight:500;
+}
 
-.content{padding:1.25rem 1rem 6rem}
+/* ── Content ─────────────────────────────────────────────────────────────────── */
+.content{padding:0 0 5rem}
 
-.cat-section{margin-bottom:2.5rem;animation:fadeUp 0.3s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;padding-bottom:0.65rem;border-bottom:1px solid rgba(184,151,42,0.2)}
-.cat-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:300;letter-spacing:0.06em}
-.cat-count{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+/* ── Category section ────────────────────────────────────────────────────────── */
+.cat-section{animation:fadeUp 0.35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.wine-card{padding:1rem 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s}
+.cat-header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:1.5rem 1.5rem 0.75rem;
+  border-bottom:1px solid var(--border-gold);
+  background:var(--cream-dark);
+  position:sticky;
+  top:calc(68px + 43px + 38px);
+  z-index:30;
+}
+.cat-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.3rem;font-weight:400;
+  letter-spacing:0.05em;color:var(--ink);
+}
+.cat-count{
+  font-size:0.58rem;font-weight:400;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ── Wine card ───────────────────────────────────────────────────────────────── */
+.wine-card{
+  padding:1.1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:var(--cream);
+  -webkit-tap-highlight-color:transparent;
+  transition:background 0.15s;
+}
 .wine-card:last-child{border-bottom:none}
-.wine-card.out-of-stock{opacity:0.5}
-.wine-card:active{opacity:0.7}
+.wine-card:active{background:var(--cream-dark)}
+.wine-card.out-of-stock{opacity:0.55}
 
-.wine-top{display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;margin-bottom:0.3rem}
-.wine-name{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;color:var(--white);line-height:1.3;flex:1;min-width:0}
-.wine-price{font-size:0.95rem;font-weight:500;color:var(--gold-light);white-space:nowrap;flex-shrink:0;padding-top:0.05rem}
-
-.wine-origin{font-size:0.72rem;color:var(--muted);margin-bottom:0.25rem;letter-spacing:0.02em}
-.wine-origin .sep{color:rgba(255,255,255,0.2);margin:0 0.3rem}
-.wine-grape{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-bottom:0.35rem;letter-spacing:0.02em}
-/* Wine card layout with photo */
-.wine-card-inner{display:flex;gap:0.85rem;align-items:flex-start}
+.wine-card-inner{display:flex;gap:1rem;align-items:flex-start}
 .wine-card-body{flex:1;min-width:0}
-.wine-photo{width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)}
 
-.wine-notes{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:rgba(255,255,255,0.42);line-height:1.55;margin-bottom:0.45rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wine-top{
+  display:flex;justify-content:space-between;
+  align-items:flex-start;gap:0.75rem;margin-bottom:0.3rem;
+}
+.wine-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.2rem;font-weight:400;
+  color:var(--ink);line-height:1.3;flex:1;min-width:0;
+}
+.wine-price{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.15rem;font-weight:400;
+  color:var(--gold);white-space:nowrap;flex-shrink:0;
+  padding-top:0.05rem;
+}
+
+.wine-origin{
+  font-size:0.72rem;font-weight:400;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:0.2rem;
+}
+.wine-origin .sep{color:var(--border-gold);margin:0 0.4rem}
+
+.wine-grape{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:0.9rem;
+  color:var(--ink-light);
+  margin-bottom:0.35rem;
+}
+
+.wine-notes{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:1rem;
+  color:var(--ink-light);line-height:1.6;
+  margin-bottom:0.5rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
 .wine-notes.expanded{-webkit-line-clamp:unset;overflow:visible}
 
-.wine-footer{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;min-height:1.4rem}
-.wine-badge{display:inline-block;font-size:0.58rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:3px}
-.badge-low{background:var(--low-bg);color:var(--low-color)}
-.badge-oos{background:var(--oos-bg);color:var(--oos-color)}
-.read-more{font-size:0.65rem;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase;background:none;border:none;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.wine-footer{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:0.5rem;min-height:1.5rem;
+}
+.wine-badge{
+  display:inline-block;
+  font-size:0.58rem;font-weight:500;
+  letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.2rem 0.6rem;border-radius:3px;
+}
+.badge-low{background:var(--low-bg);color:var(--low-color);border:1px solid rgba(139,96,16,0.2)}
+.badge-oos{background:var(--oos-bg);color:var(--oos-color);border:1px solid rgba(155,58,53,0.2)}
 
-/* Loading */
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:1rem}
-.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+.read-more{
+  font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--gold);background:none;border:none;
+  cursor:pointer;padding:0;
+  font-family:'DM Sans',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+/* Wine photo thumbnail */
+.wine-photo{
+  width:76px;height:76px;
+  object-fit:cover;border-radius:6px;
+  flex-shrink:0;
+  border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────────── */
+.loading{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:50vh;gap:1.25rem;
+}
+.spinner{
+  width:28px;height:28px;
+  border:2px solid var(--border);
+  border-top-color:var(--gold-accent);
+  border-radius:50%;
+  animation:spin 0.9s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+.loading-text{
+  font-size:0.68rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--muted);
+}
 
-.empty{text-align:center;padding:4rem 1rem;color:var(--muted)}
+.empty{text-align:center;padding:4rem 1.5rem;color:var(--muted)}
 .empty-title{font-size:0.82rem;letter-spacing:0.12em;text-transform:uppercase}
-.empty-sub{font-size:0.72rem;margin-top:0.4rem;opacity:0.6}
+.empty-sub{font-size:0.75rem;margin-top:0.5rem;opacity:0.7}
 
-footer{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);border-top:1px solid var(--border);padding:0.65rem 1.25rem;text-align:center;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--ink);
+  padding:0.75rem 1.5rem;
+  text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:0.75rem;
+}
+.footer-brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.9rem;font-weight:400;
+  letter-spacing:0.12em;color:var(--gold-accent);
+}
+.footer-sep{width:3px;height:3px;border-radius:50%;background:var(--gold-accent);opacity:0.5}
+.footer-tag{
+  font-size:0.55rem;font-weight:400;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">&amp;THEN</div>
-  <div class="header-tag">Wine List</div>
+  <div>
+    <div class="brand">&amp;THEN</div>
+    <div class="brand-sub">Wine &amp; Bar</div>
+  </div>
+  <div class="header-right">Wine List</div>
 </header>
+
+<div class="hero">
+  <div class="hero-title">Curated Selection</div>
+  <div class="hero-rule"><span class="hero-rule-icon">◆</span></div>
+</div>
 
 <div class="filter-wrap">
   <div class="filter-bar" id="filter-bar">
@@ -120,15 +347,17 @@ footer{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,0.97);bor
   </div>
 </main>
 
-<footer>&amp;THEN &nbsp;·&nbsp; Wine &amp; Bar</footer>
+<footer>
+  <span class="footer-brand">&amp;THEN</span>
+  <span class="footer-sep"></span>
+  <span class="footer-tag">Wine &amp; Bar · Chiang Mai</span>
+</footer>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-// ── STEP 1: Paste your Supabase credentials here ─────────────────────────────
-const SUPABASE_URL  = 'https://frdzflolyoynybizibhw.supabase.co'
+const SUPABASE_URL      = 'https://frdzflolyoynybizibhw.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_VmESVnVYdyBRtpJdmHyyzA_0q85tFo3'
-// ─────────────────────────────────────────────────────────────────────────────
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
@@ -137,14 +366,13 @@ let allWines = []
 let activeCat = 'All'
 let activeSort = 'default'
 
-// ── Fetch wines ───────────────────────────────────────────────────────────────
 async function fetchWines() {
   const { data, error } = await db.from('wines').select('*').order('name')
   if (error) {
     document.getElementById('content').innerHTML = `
       <div class="empty">
         <div class="empty-title">Could not load wines</div>
-        <div class="empty-sub">Check your Supabase config in the HTML file</div>
+        <div class="empty-sub">Please try again shortly</div>
       </div>`
     console.error(error)
     return
@@ -153,14 +381,12 @@ async function fetchWines() {
   render()
 }
 
-// ── Real-time subscription — updates list whenever any wine changes ────────────
 db.channel('wines-realtime')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'wines' }, fetchWines)
   .subscribe()
 
 fetchWines()
 
-// ── Sort ──────────────────────────────────────────────────────────────────────
 function sortWines(list) {
   const arr = [...list]
   switch (activeSort) {
@@ -178,7 +404,6 @@ function sortWines(list) {
   }
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
   const content = document.getElementById('content')
   if (allWines.length === 0) {
