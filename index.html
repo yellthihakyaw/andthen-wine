@@ -57,8 +57,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.96);backdrop-
 .wine-origin{font-size:0.72rem;color:var(--muted);margin-bottom:0.25rem;letter-spacing:0.02em}
 .wine-origin .sep{color:rgba(255,255,255,0.2);margin:0 0.3rem}
 .wine-grape{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-bottom:0.35rem;letter-spacing:0.02em}
-/* Wine photo */
-.wine-photo{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:0.65rem;border:1px solid var(--border)}
+/* Wine card layout with photo */
+.wine-card-inner{display:flex;gap:0.85rem;align-items:flex-start}
+.wine-card-body{flex:1;min-width:0}
+.wine-photo{width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)}
 
 .wine-notes{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:rgba(255,255,255,0.42);line-height:1.55;margin-bottom:0.45rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wine-notes.expanded{-webkit-line-clamp:unset;overflow:visible}
@@ -205,17 +207,21 @@ function render() {
         const hasNotes = w.notes && w.notes.trim()
         const longNotes = hasNotes && w.notes.length > 80
         return `<div class="wine-card${isOos ? ' out-of-stock' : ''}">
-          ${w.photo_url ? `<img class="wine-photo" src="${esc(w.photo_url)}" alt="${esc(w.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
-          <div class="wine-top">
-            <div class="wine-name">${esc(w.name)}</div>
-            <div class="wine-price">฿${Number(w.price).toLocaleString()}</div>
-          </div>
-          ${originHtml}
-          ${w.grape ? `<div class="wine-grape">${esc(w.grape)}</div>` : ''}
-          ${hasNotes ? `<div class="wine-notes" id="notes-${w.id}">${esc(w.notes)}</div>` : ''}
-          <div class="wine-footer">
-            <div>${badge}</div>
-            ${longNotes ? `<button class="read-more" onclick="toggleNotes('${w.id}',this)">More</button>` : ''}
+          <div class="wine-card-inner">
+            <div class="wine-card-body">
+              <div class="wine-top">
+                <div class="wine-name">${esc(w.name)}</div>
+                <div class="wine-price">฿${Number(w.price).toLocaleString()}</div>
+              </div>
+              ${originHtml}
+              ${w.grape ? `<div class="wine-grape">${esc(w.grape)}</div>` : ''}
+              ${hasNotes ? `<div class="wine-notes" id="notes-${w.id}">${esc(w.notes)}</div>` : ''}
+              <div class="wine-footer">
+                <div>${badge}</div>
+                ${longNotes ? `<button class="read-more" onclick="toggleNotes('${w.id}',this)">More</button>` : ''}
+              </div>
+            </div>
+            ${w.photo_url ? `<img class="wine-photo" src="${esc(w.photo_url)}" alt="${esc(w.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
           </div>
         </div>`
       }).join('')}
