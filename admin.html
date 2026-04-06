@@ -93,8 +93,18 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.97);backdrop-
 /* Thumbnail */
 .wine-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--surface)}
 .wine-thumb-placeholder{width:48px;height:48px;border-radius:6px;flex-shrink:0;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--border);font-size:1.2rem}
-/* Photo preview in form */
-.photo-preview{width:100%;height:140px;border-radius:8px;object-fit:cover;border:1px solid var(--border);margin-top:0.4rem;display:none}
+/* Photo upload */
+.photo-upload-box{border:2px dashed var(--border);border-radius:10px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:border-color 0.15s;position:relative;overflow:hidden}
+.photo-upload-box:hover{border-color:rgba(184,151,42,0.5)}
+.photo-upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:1.6rem;margin-bottom:0.4rem}
+.upload-label{font-size:0.72rem;color:var(--muted);letter-spacing:0.05em}
+.upload-label span{color:var(--gold)}
+.upload-hint{font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:0.2rem}
+.photo-preview{width:100%;height:160px;border-radius:8px;object-fit:cover;border:1px solid var(--border);margin-top:0.5rem;display:none}
+.upload-progress{height:3px;background:var(--border);border-radius:2px;margin-top:0.5rem;display:none;overflow:hidden}
+.upload-progress-bar{height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width 0.3s}
+.upload-status{font-size:0.65rem;color:var(--muted);margin-top:0.3rem;min-height:1rem;text-align:center}
 
 /* Empty / Loading */
 .empty{text-align:center;padding:4rem 1rem;color:var(--muted)}
@@ -260,9 +270,17 @@ header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.97);backdrop-
 
       <div class="form-section-label">Photo</div>
       <div class="field">
-        <label>Photo URL</label>
-        <input type="url" id="f-photo" placeholder="https://… (paste any image link)" autocomplete="off">
+        <label>Wine Photo</label>
+        <div class="photo-upload-box" id="upload-box">
+          <input type="file" id="f-photo-file" accept="image/jpeg,image/jpg,image/png,image/webp">
+          <div class="upload-icon">📷</div>
+          <div class="upload-label">Tap to choose a photo <span>from your device</span></div>
+          <div class="upload-hint">JPG, PNG, WEBP · Max 5MB</div>
+        </div>
+        <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-bar"></div></div>
+        <div class="upload-status" id="upload-status"></div>
         <img class="photo-preview" id="f-photo-preview" alt="Wine photo preview">
+        <input type="hidden" id="f-photo" value="">
       </div>
     </div>
     <div class="sheet-foot">
@@ -436,11 +454,52 @@ document.querySelector('.sort-wrap').addEventListener('click', e => {
 // ── Search ────────────────────────────────────────────────────────────────────
 document.getElementById('search').addEventListener('input', render)
 
-// ── Photo URL live preview ────────────────────────────────────────────────────
-document.getElementById('f-photo').addEventListener('input', e => {
+// ── Photo file upload ─────────────────────────────────────────────────────────
+document.getElementById('f-photo-file').addEventListener('change', async e => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  const MAX = 5 * 1024 * 1024
+  if (file.size > MAX) { toast('Photo too large — max 5MB'); e.target.value = ''; return }
+
+  // Show local preview immediately
   const prev = document.getElementById('f-photo-preview')
-  const url = e.target.value.trim()
-  if (url) { prev.src = url; prev.style.display = 'block' } else { prev.style.display = 'none' }
+  prev.src = URL.createObjectURL(file)
+  prev.style.display = 'block'
+
+  // Upload to Supabase Storage
+  const ext = file.name.split('.').pop().toLowerCase()
+  const fileName = `wine_${Date.now()}.${ext}`
+  const progress = document.getElementById('upload-progress')
+  const bar = document.getElementById('upload-bar')
+  const status = document.getElementById('upload-status')
+
+  progress.style.display = 'block'
+  bar.style.width = '30%'
+  status.textContent = 'Uploading…'
+
+  try {
+    const { data, error } = await db.storage
+      .from('wine-photos')
+      .upload(fileName, file, { contentType: file.type, upsert: true })
+
+    if (error) throw error
+
+    bar.style.width = '100%'
+    const { data: urlData } = db.storage.from('wine-photos').getPublicUrl(fileName)
+    document.getElementById('f-photo').value = urlData.publicUrl
+    prev.src = urlData.publicUrl
+    status.textContent = '✓ Photo uploaded'
+    status.style.color = 'var(--gold-light)'
+    setTimeout(() => { progress.style.display = 'none'; status.textContent = '' }, 2000)
+  } catch (err) {
+    console.error(err)
+    bar.style.width = '0%'
+    progress.style.display = 'none'
+    status.textContent = '✗ Upload failed — check bucket setup'
+    status.style.color = 'var(--oos-color)'
+    document.getElementById('f-photo').value = ''
+  }
 })
 
 // ── Sheet ─────────────────────────────────────────────────────────────────────
@@ -457,6 +516,9 @@ function openSheet(wine = null) {
   document.getElementById('f-notes').value = wine ? (wine.notes || '') : ''
   const photoVal = wine ? (wine.photo_url || '') : ''
   document.getElementById('f-photo').value = photoVal
+  document.getElementById('f-photo-file').value = ''
+  document.getElementById('upload-progress').style.display = 'none'
+  document.getElementById('upload-status').textContent = ''
   const prev = document.getElementById('f-photo-preview')
   if (photoVal) { prev.src = photoVal; prev.style.display = 'block' } else { prev.style.display = 'none' }
   document.getElementById('overlay').classList.add('open')
