@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>&THEN — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;--surface:#111;--card:#161616;
+  --white:#fafaf7;--gold:#b8972a;--gold-light:#d4b04a;
+  --muted:#666;--border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.18);
+  --danger:#c0392b;--danger-bg:rgba(192,57,43,0.12);
+  --low-color:#d4a017;--oos-color:#e57373;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── Password gate ── */
+.gate{position:fixed;inset:0;background:var(--black);z-index:999;display:flex;align-items:center;justify-content:center;padding:2rem}
+.gate-box{width:100%;max-width:340px;text-align:center}
+.gate-brand{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;letter-spacing:0.08em;margin-bottom:0.3rem}
+.gate-sub{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:2.5rem}
+.gate-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--white);outline:none;text-align:center;letter-spacing:0.1em;margin-bottom:0.75rem}
+.gate-input:focus{border-color:rgba(184,151,42,0.5)}
+.gate-btn{width:100%;background:var(--gold);color:var(--black);border:none;padding:0.85rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;margin-bottom:0.6rem}
+.gate-btn:active{opacity:0.8}
+.gate-err{font-size:0.75rem;color:var(--oos-color);min-height:1.2rem}
+.gate.hidden{display:none}
+
+/* Header */
+header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0.85rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem}
+.brand{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;letter-spacing:0.05em;flex-shrink:0}
+.brand-sub{font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:0.6rem;flex-shrink:0}
+.btn-add{background:var(--gold);color:var(--black);border:none;padding:0.55rem 1.1rem;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s}
+.btn-add:active{opacity:0.8}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:0.5rem 0.75rem;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.72rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* Menu link */
+.menu-bar{padding:0.6rem 1rem;text-align:center;border-bottom:1px solid var(--border);background:var(--surface)}
+.menu-link{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;-webkit-tap-highlight-color:transparent}
+
+/* Filter tabs */
+.filter-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:53px;z-index:40}
+.filter-wrap::-webkit-scrollbar{display:none}
+.filter-bar{display:flex;gap:0;width:max-content;min-width:100%}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.67rem;font-weight:400;letter-spacing:0.07em;padding:0.65rem 0.9rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.tab-btn.active{color:var(--gold-light);border-bottom-color:var(--gold)}
+
+/* Sort */
+.sort-wrap{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 1rem;border-bottom:1px solid var(--border);background:var(--black);overflow-x:auto;scrollbar-width:none}
+.sort-wrap::-webkit-scrollbar{display:none}
+.sort-label{font-size:0.58rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.sort-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.62rem;padding:0.3rem 0.65rem;border-radius:5px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all 0.15s;flex-shrink:0}
+.sort-btn.active{border-color:rgba(184,151,42,0.4);color:var(--gold-light);background:rgba(184,151,42,0.08)}
+
+/* Stats */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.stat{background:var(--surface);padding:0.75rem 1rem;text-align:center}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;color:var(--white)}
+.stat-label{font-size:0.57rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:0.1rem}
+
+/* Search */
+.search-wrap{padding:0.65rem 1rem;background:var(--black)}
+.search-inner{position:relative;display:flex;align-items:center}
+.search-icon-svg{position:absolute;left:0.75rem;color:var(--muted);pointer-events:none;width:15px;height:15px;flex-shrink:0}
+.search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.85rem 0.6rem 2.2rem;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--white);outline:none;transition:border-color 0.15s}
+.search:focus{border-color:rgba(184,151,42,0.4)}
+.search::placeholder{color:var(--muted)}
+
+/* Wine list */
+.wine-list{padding:0 0 6rem}
+.wine-item{padding:0.9rem 1rem;border-bottom:1px solid var(--border);background:var(--black)}
+.wine-item-top{display:flex;align-items:flex-start;gap:0.75rem}
+.wine-info{flex:1;min-width:0}
+.wine-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.2rem}
+.wine-meta{display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.15rem}
+.wine-cat{font-size:0.57rem;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.06);padding:0.15rem 0.45rem;border-radius:3px}
+.wine-stock{font-size:0.68rem}
+.stock-low{color:var(--low-color)}
+.stock-oos{color:var(--oos-color)}
+.stock-ok{color:var(--muted)}
+.wine-origin{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-bottom:0.2rem}
+.wine-notes-preview{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:rgba(255,255,255,0.28);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wine-price{font-size:0.88rem;font-weight:500;color:var(--gold-light);margin-top:0.3rem}
+.item-actions{display:flex;gap:0.35rem;flex-shrink:0;align-self:flex-start}
+.btn-edit,.btn-del{background:none;border:none;width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+.btn-edit{border:1px solid var(--border)}
+.btn-edit:active{background:rgba(255,255,255,0.08)}
+.btn-del{color:var(--danger)}
+.btn-del:active{background:var(--danger-bg)}
+/* Thumbnail */
+.wine-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--surface)}
+.wine-thumb-placeholder{width:48px;height:48px;border-radius:6px;flex-shrink:0;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--border);font-size:1.2rem}
+/* Photo upload */
+.photo-upload-box{border:2px dashed var(--border);border-radius:10px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:border-color 0.15s;position:relative;overflow:hidden}
+.photo-upload-box:hover{border-color:rgba(184,151,42,0.5)}
+.photo-upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:1.6rem;margin-bottom:0.4rem}
+.upload-label{font-size:0.72rem;color:var(--muted);letter-spacing:0.05em}
+.upload-label span{color:var(--gold)}
+.upload-hint{font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:0.2rem}
+.photo-preview{width:100%;height:160px;border-radius:8px;object-fit:cover;border:1px solid var(--border);margin-top:0.5rem;display:none}
+.upload-progress{height:3px;background:var(--border);border-radius:2px;margin-top:0.5rem;display:none;overflow:hidden}
+.upload-progress-bar{height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width 0.3s}
+.upload-status{font-size:0.65rem;color:var(--muted);margin-top:0.3rem;min-height:1rem;text-align:center}
+
+/* Empty / Loading */
+.empty{text-align:center;padding:4rem 1rem;color:var(--muted)}
+.empty-title{font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase}
+.empty-sub{font-size:0.72rem;margin-top:0.4rem;opacity:0.6}
+.loading-row{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase}
+
+/* Bottom sheet */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:16px 16px 0 0;border-top:1px solid var(--border);width:100%;max-width:540px;max-height:94vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);margin:0.75rem auto 0}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.sheet-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300}
+.btn-close{background:none;border:none;color:var(--muted);font-size:1.15rem;cursor:pointer;padding:0.25rem;-webkit-tap-highlight-color:transparent}
+
+.sheet-body{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:0.9rem}
+.form-section-label{font-size:0.58rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);padding-top:0.25rem;border-top:1px solid var(--border);margin-top:0.1rem}
+.field{display:flex;flex-direction:column;gap:0.35rem}
+.field label{font-size:0.62rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.85rem;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--white);outline:none;width:100%;-webkit-appearance:none;transition:border-color 0.15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(184,151,42,0.5)}
+.field select option{background:#1a1a1a}
+.field textarea{resize:vertical;min-height:100px;line-height:1.6;font-size:0.88rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+
+.sheet-foot{padding:0.9rem 1.25rem 2rem;display:flex;flex-direction:column;gap:0.6rem}
+.btn-save{background:var(--gold);color:var(--black);border:none;padding:0.85rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;transition:opacity 0.15s}
+.btn-save:active,.btn-save:disabled{opacity:0.7}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);padding:0.75rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent}
+
+/* Toast */
+.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(25,25,25,0.97);border:1px solid var(--border);color:var(--white);padding:0.65rem 1.25rem;border-radius:20px;font-size:0.78rem;letter-spacing:0.04em;z-index:400;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-brand">&amp;THEN</div>
+    <div class="gate-sub">Admin Panel</div>
+    <input class="gate-input" type="password" id="gate-pw" placeholder="Enter password" autocomplete="current-password">
+    <button class="gate-btn" id="gate-btn">Enter</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<header>
+  <div>
+    <div class="brand">&amp;THEN</div>
+    <div class="brand-sub">Admin Panel</div>
+  </div>
+  <div class="header-right">
+    <button class="btn-logout" id="logout-btn">Lock</button>
+    <button class="btn-add" id="add-btn">+ Add Wine</button>
+  </div>
+</header>
+
+<div class="menu-bar">
+  <a class="menu-link" href="index.html" target="_blank">View wine menu →</a>
+</div>
+
+<div class="filter-wrap">
+  <div class="filter-bar" id="tab-bar">
+    <button class="tab-btn active" data-cat="All">All</button>
+    <button class="tab-btn" data-cat="Red Wine">Red Wine</button>
+    <button class="tab-btn" data-cat="White Wine">White Wine</button>
+    <button class="tab-btn" data-cat="Natural Red">Natural Red</button>
+    <button class="tab-btn" data-cat="Natural White">Natural White</button>
+    <button class="tab-btn" data-cat="Orange Wine">Orange Wine</button>
+    <button class="tab-btn" data-cat="Pet Nat">Pet Nat</button>
+    <button class="tab-btn" data-cat="Sparkling">Sparkling</button>
+    <button class="tab-btn" data-cat="Rosé">Rosé</button>
+    <button class="tab-btn" data-cat="Sato">Sato</button>
+    <button class="tab-btn" data-cat="Sake">Sake</button>
+    <button class="tab-btn" data-cat="Others">Others</button>
+  </div>
+</div>
+
+<div class="sort-wrap">
+  <span class="sort-label">Sort:</span>
+  <button class="sort-btn active" data-sort="default">Default</button>
+  <button class="sort-btn" data-sort="name-az">A–Z</button>
+  <button class="sort-btn" data-sort="price-asc">Price ↑</button>
+  <button class="sort-btn" data-sort="price-desc">Price ↓</button>
+  <button class="sort-btn" data-sort="in-stock">In Stock First</button>
+  <button class="sort-btn" data-sort="low-stock">Low Stock First</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-val" id="s-oos">—</div><div class="stat-label">Out of Stock</div></div>
+  <div class="stat"><div class="stat-val" id="s-low">—</div><div class="stat-label">Low Stock</div></div>
+</div>
+
+<div class="search-wrap">
+  <div class="search-inner">
+    <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input class="search" id="search" type="search" placeholder="Search by name, region, grape, country…" autocomplete="off">
+  </div>
+</div>
+
+<div class="wine-list" id="wine-list">
+  <div class="loading-row">Loading…</div>
+</div>
+
+<!-- Add/Edit Sheet -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title" id="sheet-title">Add Wine</div>
+      <button class="btn-close" id="close-btn">✕</button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="f-id">
+
+      <div class="form-section-label">Basic Info</div>
+      <div class="field">
+        <label>Wine name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Domaine Lapierre Morgon 2022" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Category *</label>
+        <select id="f-cat">
+          <option value="Red Wine">Red Wine</option>
+          <option value="White Wine">White Wine</option>
+          <option value="Natural Red">Natural Red</option>
+          <option value="Natural White">Natural White</option>
+          <option value="Orange Wine">Orange Wine</option>
+          <option value="Pet Nat">Pet Nat</option>
+          <option value="Sparkling">Sparkling</option>
+          <option value="Rosé">Rosé</option>
+          <option value="Sato">Sato</option>
+          <option value="Sake">Sake</option>
+          <option value="Others">Others</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Price (฿) *</label>
+          <input type="number" id="f-price" placeholder="2500" min="0" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Stock qty *</label>
+          <input type="number" id="f-qty" placeholder="12" min="0" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="form-section-label">Origin</div>
+      <div class="form-row">
+        <div class="field">
+          <label>Region</label>
+          <input type="text" id="f-region" placeholder="e.g. Beaujolais" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Country</label>
+          <input type="text" id="f-country" placeholder="e.g. France" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="form-section-label">Additional Details</div>
+      <div class="field">
+        <label>Grape Variety</label>
+        <input type="text" id="f-grape" placeholder="e.g. Pinot Noir, Grenache Blanc…" autocomplete="off">
+      </div>
+
+      <div class="form-section-label">Tasting Notes</div>
+      <div class="field">
+        <label>Tasting notes</label>
+        <textarea id="f-notes" placeholder="Describe aromas, flavours, texture, finish…"></textarea>
+      </div>
+
+      <div class="form-section-label">Photo</div>
+      <div class="field">
+        <label>Wine Photo</label>
+        <div class="photo-upload-box" id="upload-box">
+          <input type="file" id="f-photo-file" accept="image/jpeg,image/jpg,image/png,image/webp">
+          <div class="upload-icon">📷</div>
+          <div class="upload-label">Tap to choose a photo <span>from your device</span></div>
+          <div class="upload-hint">JPG, PNG, WEBP · Max 5MB</div>
+        </div>
+        <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-bar"></div></div>
+        <div class="upload-status" id="upload-status"></div>
+        <img class="photo-preview" id="f-photo-preview" alt="Wine photo preview">
+        <input type="hidden" id="f-photo" value="">
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn-save" id="save-btn">Save Wine</button>
+      <button class="btn-cancel" id="cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+// ── STEP 1: Paste your Supabase credentials here ─────────────────────────────
+const SUPABASE_URL      = 'https://frdzflolyoynybizibhw.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_VmESVnVYdyBRtpJdmHyyzA_0q85tFo3'
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── STEP 2: Set your admin password ──────────────────────────────────────────
+const ADMIN_PASSWORD = 'andthen2024'
+// ─────────────────────────────────────────────────────────────────────────────
+
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+let allWines = []
+let navCat = 'All'
+let activeSort = 'default'
+
+// ── Password gate ─────────────────────────────────────────────────────────────
+function checkAuth() {
+  return sessionStorage.getItem('andthen_auth') === 'yes'
+}
+
+if (checkAuth()) {
+  document.getElementById('gate').classList.add('hidden')
+  initApp()
+}
+
+document.getElementById('gate-btn').addEventListener('click', tryLogin)
+document.getElementById('gate-pw').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin() })
+
+function tryLogin() {
+  const pw = document.getElementById('gate-pw').value
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem('andthen_auth', 'yes')
+    document.getElementById('gate').classList.add('hidden')
+    initApp()
+  } else {
+    document.getElementById('gate-err').textContent = 'Incorrect password'
+    document.getElementById('gate-pw').value = ''
+    document.getElementById('gate-pw').focus()
+  }
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('andthen_auth')
+  location.reload()
+})
+
+// ── App ───────────────────────────────────────────────────────────────────────
+async function fetchWines() {
+  const { data, error } = await db.from('wines').select('*').order('name')
+  if (error) { console.error(error); return }
+  allWines = data || []
+  render()
+}
+
+function initApp() {
+  fetchWines()
+  // Real-time: re-fetch whenever the wines table changes
+  db.channel('wines-admin')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'wines' }, fetchWines)
+    .subscribe()
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+function sortList(list) {
+  const arr = [...list]
+  switch (activeSort) {
+    case 'name-az':    return arr.sort((a,b) => a.name.localeCompare(b.name))
+    case 'price-asc':  return arr.sort((a,b) => Number(a.price) - Number(b.price))
+    case 'price-desc': return arr.sort((a,b) => Number(b.price) - Number(a.price))
+    case 'in-stock':   return arr.sort((a,b) => {
+      const qa=parseInt(a.quantity??0),qb=parseInt(b.quantity??0)
+      if(qa>0&&qb===0)return -1;if(qa===0&&qb>0)return 1;return 0
+    })
+    case 'low-stock':  return arr.sort((a,b) => {
+      const qa=parseInt(a.quantity??0),qb=parseInt(b.quantity??0)
+      const la=qa>0&&qa<=5,lb=qb>0&&qb<=5
+      if(la&&!lb)return -1;if(!la&&lb)return 1;return qa-qb
+    })
+    default: return arr
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const q = document.getElementById('search').value.toLowerCase()
+  let list = navCat === 'All' ? [...allWines] : allWines.filter(w => w.category === navCat)
+  if (q) list = list.filter(w => (w.name+' '+(w.region||'')+' '+(w.country||'')+' '+(w.grape||'')).toLowerCase().includes(q))
+  list = sortList(list)
+
+  document.getElementById('s-total').textContent = allWines.length
+  document.getElementById('s-oos').textContent = allWines.filter(w => parseInt(w.quantity??0) === 0).length
+  document.getElementById('s-low').textContent = allWines.filter(w => { const q=parseInt(w.quantity??0); return q>0&&q<=5 }).length
+
+  const container = document.getElementById('wine-list')
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty">
+      <div class="empty-title">${allWines.length === 0 ? 'No wines yet' : 'No results'}</div>
+      <div class="empty-sub">${allWines.length === 0 ? 'Tap + Add Wine to get started' : 'Try a different search or filter'}</div>
+    </div>`
+    return
+  }
+
+  container.innerHTML = list.map(w => {
+    const qty = parseInt(w.quantity??0)
+    const isOos = qty === 0, isLow = qty > 0 && qty <= 5
+    const stockClass = isOos ? 'stock-oos' : isLow ? 'stock-low' : 'stock-ok'
+    const stockLabel = isOos ? 'Out of stock' : isLow ? `${qty} left (low)` : `${qty} in stock`
+    const origin = [w.region, w.country].filter(Boolean).join(' · ')
+    const notesPreview = w.notes ? w.notes.substring(0,55)+(w.notes.length>55?'…':'') : ''
+    return `<div class="wine-item">
+      <div class="wine-item-top">
+        ${w.photo_url ? `<img class="wine-thumb" src="${esc(w.photo_url)}" alt="${esc(w.name)}" onerror="this.style.display='none'">` : `<div class="wine-thumb-placeholder">🍷</div>`}
+        <div class="wine-info">
+          <div class="wine-name">${esc(w.name)}</div>
+          <div class="wine-meta">
+            <span class="wine-cat">${esc(w.category)}</span>
+            <span class="wine-stock ${stockClass}">${stockLabel}</span>
+          </div>
+          ${origin ? `<div class="wine-origin">${esc(origin)}</div>` : ''}
+          ${w.grape ? `<div class="wine-origin" style="color:rgba(255,255,255,0.4)">${esc(w.grape)}</div>` : ''}
+          ${notesPreview ? `<div class="wine-notes-preview">${esc(notesPreview)}</div>` : ''}
+          <div class="wine-price">฿${Number(w.price).toLocaleString()}</div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-edit" data-id="${w.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-del" data-id="${w.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+document.getElementById('tab-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn')
+  if (!btn) return
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  navCat = btn.dataset.cat
+  render()
+})
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+document.querySelector('.sort-wrap').addEventListener('click', e => {
+  const btn = e.target.closest('.sort-btn')
+  if (!btn) return
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  activeSort = btn.dataset.sort
+  render()
+})
+
+// ── Search ────────────────────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', render)
+
+// ── Photo file upload ─────────────────────────────────────────────────────────
+document.getElementById('f-photo-file').addEventListener('change', async e => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  const MAX = 5 * 1024 * 1024
+  if (file.size > MAX) { toast('Photo too large — max 5MB'); e.target.value = ''; return }
+
+  // Show local preview immediately
+  const prev = document.getElementById('f-photo-preview')
+  prev.src = URL.createObjectURL(file)
+  prev.style.display = 'block'
+
+  // Upload to Supabase Storage
+  const ext = file.name.split('.').pop().toLowerCase()
+  const fileName = `wine_${Date.now()}.${ext}`
+  const progress = document.getElementById('upload-progress')
+  const bar = document.getElementById('upload-bar')
+  const status = document.getElementById('upload-status')
+
+  progress.style.display = 'block'
+  bar.style.width = '30%'
+  status.textContent = 'Uploading…'
+
+  try {
+    const { data, error } = await db.storage
+      .from('wine-photos')
+      .upload(fileName, file, { contentType: file.type, upsert: true })
+
+    if (error) throw error
+
+    bar.style.width = '100%'
+    const { data: urlData } = db.storage.from('wine-photos').getPublicUrl(fileName)
+    document.getElementById('f-photo').value = urlData.publicUrl
+    prev.src = urlData.publicUrl
+    status.textContent = '✓ Photo uploaded'
+    status.style.color = 'var(--gold-light)'
+    setTimeout(() => { progress.style.display = 'none'; status.textContent = '' }, 2000)
+  } catch (err) {
+    console.error(err)
+    bar.style.width = '0%'
+    progress.style.display = 'none'
+    status.textContent = '✗ Upload failed — check bucket setup'
+    status.style.color = 'var(--oos-color)'
+    document.getElementById('f-photo').value = ''
+  }
+})
+
+// ── Sheet ─────────────────────────────────────────────────────────────────────
+function openSheet(wine = null) {
+  document.getElementById('sheet-title').textContent = wine ? 'Edit Wine' : 'Add Wine'
+  document.getElementById('f-id').value = wine ? wine.id : ''
+  document.getElementById('f-name').value = wine ? wine.name : ''
+  document.getElementById('f-cat').value = wine ? wine.category : 'Red Wine'
+  document.getElementById('f-price').value = wine ? wine.price : ''
+  document.getElementById('f-qty').value = wine != null ? wine.quantity : ''
+  document.getElementById('f-region').value = wine ? (wine.region || '') : ''
+  document.getElementById('f-country').value = wine ? (wine.country || '') : ''
+  document.getElementById('f-grape').value = wine ? (wine.grape || '') : ''
+  document.getElementById('f-notes').value = wine ? (wine.notes || '') : ''
+  const photoVal = wine ? (wine.photo_url || '') : ''
+  document.getElementById('f-photo').value = photoVal
+  document.getElementById('f-photo-file').value = ''
+  document.getElementById('upload-progress').style.display = 'none'
+  document.getElementById('upload-status').textContent = ''
+  const prev = document.getElementById('f-photo-preview')
+  if (photoVal) { prev.src = photoVal; prev.style.display = 'block' } else { prev.style.display = 'none' }
+  document.getElementById('overlay').classList.add('open')
+  setTimeout(() => document.getElementById('f-name').focus(), 200)
+}
+
+function closeSheet() { document.getElementById('overlay').classList.remove('open') }
+
+document.getElementById('add-btn').addEventListener('click', () => openSheet())
+document.getElementById('close-btn').addEventListener('click', closeSheet)
+document.getElementById('cancel-btn').addEventListener('click', closeSheet)
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeSheet()
+})
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const id       = document.getElementById('f-id').value
+  const name     = document.getElementById('f-name').value.trim()
+  const category = document.getElementById('f-cat').value
+  const price    = parseInt(document.getElementById('f-price').value)
+  const quantity = parseInt(document.getElementById('f-qty').value)
+  const region    = document.getElementById('f-region').value.trim()
+  const country   = document.getElementById('f-country').value.trim()
+  const grape     = document.getElementById('f-grape').value.trim()
+  const notes     = document.getElementById('f-notes').value.trim()
+  const photo_url = document.getElementById('f-photo').value.trim()
+
+  if (!name) { document.getElementById('f-name').focus(); return }
+  if (isNaN(price) || price < 0) { toast('Enter a valid price'); return }
+  if (isNaN(quantity) || quantity < 0) { toast('Enter a valid quantity'); return }
+
+  const saveBtn = document.getElementById('save-btn')
+  saveBtn.disabled = true
+  saveBtn.textContent = 'Saving…'
+
+  const data = { name, category, price, quantity, region, country, grape, notes, photo_url }
+
+  try {
+    if (id) {
+      const { error } = await db.from('wines').update(data).eq('id', id)
+      if (error) throw error
+      toast('Wine updated ✓')
+    } else {
+      const { error } = await db.from('wines').insert(data)
+      if (error) throw error
+      toast('Wine added ✓')
+    }
+    closeSheet()
+  } catch (err) {
+    console.error(err)
+    toast('Error — check connection')
+  } finally {
+    saveBtn.disabled = false
+    saveBtn.textContent = 'Save Wine'
+  }
+})
+
+// ── Edit / Delete ─────────────────────────────────────────────────────────────
+document.getElementById('wine-list').addEventListener('click', async e => {
+  const editBtn = e.target.closest('.btn-edit')
+  const delBtn  = e.target.closest('.btn-del')
+  if (editBtn) {
+    const wine = allWines.find(w => w.id === editBtn.dataset.id)
+    if (wine) openSheet(wine)
+  }
+  if (delBtn) {
+    const wine = allWines.find(w => w.id === delBtn.dataset.id)
+    if (!wine) return
+    if (confirm(`Delete "${wine.name}"?\nThis cannot be undone.`)) {
+      try {
+        const { error } = await db.from('wines').delete().eq('id', wine.id)
+        if (error) throw error
+        toast('Deleted')
+      } catch (err) {
+        toast('Error deleting wine')
+      }
+    }
+  }
+})
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast')
+  el.textContent = msg; el.classList.add('show')
+  clearTimeout(el._t)
+  el._t = setTimeout(() => el.classList.remove('show'), 2500)
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+</script>
+</body>
+</html>
