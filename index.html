@@ -110,6 +110,36 @@ header{
   font-weight:500;
 }
 
+/* ── Search bar ──────────────────────────────────────────────────────────────── */
+.search-wrap{
+  padding:0.75rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  background:var(--cream);
+  position:sticky;top:calc(68px + 48px);z-index:39;
+}
+.search-box{
+  display:flex;align-items:center;gap:0.6rem;
+  background:var(--cream-dark);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:0.55rem 1rem;
+  transition:border-color 0.2s;
+}
+.search-box:focus-within{border-color:var(--gold)}
+.search-icon{color:var(--muted);font-size:0.85rem;flex-shrink:0}
+.search-input{
+  flex:1;background:none;border:none;outline:none;
+  font-family:'DM Sans',sans-serif;font-size:0.9rem;
+  font-weight:300;color:var(--ink);
+}
+.search-input::placeholder{color:var(--muted)}
+.search-clear{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:0.75rem;padding:0;
+  display:none;-webkit-tap-highlight-color:transparent;
+}
+.search-clear.visible{display:block}
+
 /* ── Sort bar ────────────────────────────────────────────────────────────────── */
 .sort-bar{
   display:flex;align-items:center;gap:0.5rem;
@@ -327,6 +357,19 @@ footer{
     <button class="filter-btn" data-cat="Natural White">Natural White</button>
     <button class="filter-btn" data-cat="Orange Wine">Orange Wine</button>
     <button class="filter-btn" data-cat="Pet Nat">Pet Nat</button>
+    <button class="filter-btn" data-cat="Sparkling">Sparkling</button>
+    <button class="filter-btn" data-cat="Rosé">Rosé</button>
+    <button class="filter-btn" data-cat="Sato">Sato</button>
+    <button class="filter-btn" data-cat="Sake">Sake</button>
+    <button class="filter-btn" data-cat="Others">Others</button>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search" type="text" placeholder="Search wine, grape, region…" autocomplete="off">
+    <button class="search-clear" id="search-clear">✕</button>
   </div>
 </div>
 
@@ -361,10 +404,11 @@ const SUPABASE_ANON_KEY = 'sb_publishable_VmESVnVYdyBRtpJdmHyyzA_0q85tFo3'
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-const CATS = ['Red Wine','White Wine','Natural Red','Natural White','Orange Wine','Pet Nat']
+const CATS = ['Red Wine','White Wine','Natural Red','Natural White','Orange Wine','Pet Nat','Sparkling','Rosé','Sato','Sake','Others']
 let allWines = []
 let activeCat = 'All'
 let activeSort = 'default'
+let searchQuery = ''
 
 async function fetchWines() {
   const { data, error } = await db.from('wines').select('*').order('name')
@@ -410,10 +454,15 @@ function render() {
     content.innerHTML = `<div class="empty"><div class="empty-title">No wines available</div><div class="empty-sub">Check back soon</div></div>`
     return
   }
+  const q = searchQuery.toLowerCase()
   const cats = activeCat === 'All' ? CATS : [activeCat]
   let html = ''
   cats.forEach(cat => {
-    const items = sortWines(allWines.filter(w => w.category === cat))
+    let filtered = allWines.filter(w => w.category === cat)
+    if (q) filtered = filtered.filter(w =>
+      [w.name, w.region, w.country, w.grape, w.notes].filter(Boolean).join(' ').toLowerCase().includes(q)
+    )
+    const items = sortWines(filtered)
     if (!items.length) return
     html += `<div class="cat-section">
       <div class="cat-header">
@@ -477,6 +526,20 @@ document.querySelector('.sort-bar').addEventListener('click', e => {
   document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
   activeSort = btn.dataset.sort
+  render()
+})
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim()
+  const clearBtn = document.getElementById('search-clear')
+  clearBtn.classList.toggle('visible', searchQuery.length > 0)
+  render()
+})
+
+document.getElementById('search-clear').addEventListener('click', () => {
+  document.getElementById('search').value = ''
+  searchQuery = ''
+  document.getElementById('search-clear').classList.remove('visible')
   render()
 })
 
